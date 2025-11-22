@@ -7,38 +7,38 @@
 #define btnreg PIND
 #define btnpin 0b00000100
 #define ledreg PORTD
-#define ledmask 0b01110000
-#define buzzreg PIND
+#define ledmask 0b11100000
+#define buzzreg PORTD
 #define buzzpin 0b00001000
 #define objects 1
 
 extern unsigned adcx;
 extern unsigned adcy;
+unsigned buzzval;
 
 unsigned char litvin_idle[1][14] = {
 	{0x38, 0x44, 0x44, 0x44, 0x38, 0x10, 0x38, 0x54, 0x54, 0x54, 0x28, 0x28, 0x28, 0x6c}
 };
 
-const int ledcols[] = {0, 0b00010000, 0b00100000, 0b01000000, 0b00110000, 0b01100000, 0b01010000, 0b01110000};
+const int ledcols[] = {0, 0b10000000, 0b00100000, 0b01000000, 0b01100000, 0b11000000, 0b10100000, 0b11100000};
 
 object_t obj[objects];
 
 void timer_init(int div) {
-	TCCR1A = 0;
-	TCCR1B = 0;
-	TIMSK1 = (1 << TOIE1);
-	TCCR1B |= 0b1100;
-	OCR1A = div;
-	TIMSK1 |= 0b0010;
+	TCNT2 = 0;
+	TIMSK2 |= (1 << OCIE2A);
+	TCCR2A |= (1 << WGM21);
+	TCCR2B |= (1 << CS21);
+	OCR2A = div;
 }
 
 void led_init(void) {
-	DDRD |= 0b01110000;
+	DDRD |= ledmask;
 }
 
 void btn_init(void) {
-	DDRD |= 0b00000100;
-	PORTD |= 0b1;
+	DDRD &= ~btnpin;
+	PORTD |= btnpin;
 }
 
 int btn_read(void) {
@@ -50,9 +50,15 @@ void led_print(int col) {
 	ledreg |= ledcols[col];
 }
 
+void buzzer_init(void) {
+	DDRD |= buzzpin;
+	buzzval = 0;
+}
+
 void buzz(void) {
 	buzzreg &= ~(buzzpin);
-	buzzreg |= buzzpin;
+	buzzreg |= (buzzpin & buzzval);
+	buzzval = ~buzzval;
 }
 
 void adc_init(void) {
@@ -95,7 +101,7 @@ void init_obj(object_t *obj, unsigned char** idle, unsigned char** move,
 }
 
 void init(void) {
-	init_obj(obj+0, litvin_idle, litvin_idle, 1, 1, 8, 14, 0, 0, &litvin_update);
+//	init_obj(obj+0, litvin_idle, litvin_idle, 1, 1, 8, 14, 0, 0, &litvin_update);
 	nokia_lcd_init();
 	nokia_lcd_clear();
 	nokia_lcd_write_string("HELLO WORLD", 1);
