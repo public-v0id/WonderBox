@@ -1,17 +1,18 @@
 #ifndef WONDERBOX_H
 #define WONDERBOX_H 
 
-typedef struct {
+typedef struct object {
 	unsigned char **idle;
 	unsigned char **move;
+	unsigned char **cur_anim;
 	unsigned int idle_frames;
 	unsigned int move_frames;
-	unsigned int cur_frames;
+	unsigned int cur_frame;
 	unsigned char xsz;
 	unsigned char ysz;
 	unsigned char x;
 	unsigned char y;
-	void (*update)(void);
+	void (*update)(struct object *);
 } object_t;
 
 void timer_init(int div);
