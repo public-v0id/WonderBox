@@ -10,12 +10,26 @@ typedef struct object {
 	unsigned int cur_frame;
 	unsigned char xsz;
 	unsigned char ysz;
-	unsigned char x;
-	unsigned char y;
+	double x;
+	double y;
+	double vx;
+	double vy;
 	void (*update)(struct object *);
 } object_t;
 
+typedef struct {
+	unsigned char x;
+	unsigned char y;
+} snake_t;
+
+typedef struct {
+	void (*init)(void);
+	void (*update)(void);
+	void (*deinit)(void);
+} game_t;
+
 void timer_init(int div);
+void buzzer_init(void);
 void led_init(void);
 void btn_init(void);
 int btn_read(void);
